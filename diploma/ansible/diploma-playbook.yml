@@ -1,0 +1,7 @@
+---
+- name: Cloud fault tolerance task 1.
+  hosts: cloud_webservers
+  become: true
+ 
+  roles:
+    - nginx-role
