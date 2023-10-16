@@ -1,4 +1,0 @@
----
-# defaults file for nginx
-#
-destin_folder_nginx: /var/www/public

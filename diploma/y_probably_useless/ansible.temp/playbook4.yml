@@ -1,7 +1,0 @@
----
-- name: Ansible lesson 2 task 3.
-  hosts: deb10machines
-  become: true
- 
-  roles:
-    - apache

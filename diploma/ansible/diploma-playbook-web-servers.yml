@@ -1,8 +1,0 @@
----
-- name: Diploma playbook web
-  hosts: cloud_webservers
-  become: true
- 
-  roles:
-    - nginx-role
-    - zabbix-agent-role
