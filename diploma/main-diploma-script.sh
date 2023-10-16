@@ -67,6 +67,7 @@ terraform apply;
 mkdir ~/.ssh;
 terraform output -raw "_ssh-config" > ~/.ssh/config;
 terraform output -raw "ansible-inventory" > ~/ansible/hosts;
+#terraform output -raw "zabbix-server-private-ip" > ~/ansible/zabbix-agent-role/files/diploma-zabbix-agent.conf;
 
 #Setting ssh 'StrictHostKeyChecking' directive to 'accept-new' instead of 'ask'
 printf "\n*********************\n*********************\nSETTING SSH 'StrictHostKeyChecking' DIRECTIVE TO 'accept-new' INSTEAD OF 'ask'\n*********************\n*********************\n\n"
@@ -90,7 +91,7 @@ sudo cat /etc/ssh/ssh_config | grep StrictHostKeyChecking;
 #Running ansible playbook ~/ansible/diploma-playbook.yml
 printf "\n*********************\n*********************\nRUNNING ANSIBLE PLAYBOOK ~/ansible/diploma-playbook.yml\n*********************\n*********************\n\n"
 
-ansible-playbook diploma-playbook.yml;
+ansible-playbook diploma-playbook-web-servers.yml;
 
 #Step n: all done. Below are the public ip addresses of your resources. Please do not forget to use 'terraform destroy' whenever you don't need the infrastructure.
 printf "\n*********************\n*********************\nSTEP N: ALL DONE. BELOW ARE THE PUBLIC IP ADDRESSES OF YOUR RESOURCES. PLEASE DO NOT FORGET TO USE 'terraform destroy' WHENEVER YOU DON'T NEED THE INFRASTRUCTURE.\n*********************\n*********************\n\n"

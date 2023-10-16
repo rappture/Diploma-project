@@ -7,13 +7,13 @@
 
 - name: Create the directory for index.html file.
   file:
-    path: "{{ destin_folder }}"
+    path: "{{ destin_folder_nginx }}"
     state: directory
  
 - name: Make index.html.
   template:
     src: "index.html.j2"
-    dest: "{{ destin_folder }}/index.html"
+    dest: "{{ destin_folder_nginx }}/index.html"
     mode: 0555
   notify:
     - Restart Nginx handler 

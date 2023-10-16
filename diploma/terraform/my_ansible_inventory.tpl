@@ -20,6 +20,9 @@ yuliya_sh@${kibana-private-ip}
 [cloud_zabbix]
 yuliya_sh@${zabbix-private-ip}
 
+[all:vars]
+zabbixPRIVATEip=${zabbix-private-ip}
+
 [cloud_all_but_bastion:vars]
 ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q bastion-host"'
 

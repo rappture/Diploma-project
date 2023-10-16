@@ -1,4 +1,4 @@
 ---
-# defaults file for apache
+# defaults file for nginx
 #
-destin_folder: /var/www/public
+destin_folder_nginx: /var/www/public

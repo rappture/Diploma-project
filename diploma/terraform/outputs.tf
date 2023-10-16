@@ -1,5 +1,5 @@
 output "_ssh-config" {
-  description = "Is used to create SSH configuration file using template"
+  description = "Is used in main-diploma-script.sh to create SSH configuration file using template"
   value = templatefile("my_ssh_config.tpl", {
     bastion-public-ip = yandex_compute_instance.bastion-host.network_interface.0.nat_ip_address,
     elasticsearch-private-ip = yandex_compute_instance.elasticsearch-server.network_interface.0.ip_address,
@@ -11,7 +11,7 @@ output "_ssh-config" {
 }
 
 output "ansible-inventory" {
-  description = "Is used to create ansible inventory file using template"
+  description = "Is used in main-diploma-script.sh to create ansible inventory file using template"
   value = templatefile("my_ansible_inventory.tpl", {
     bastion-public-ip = yandex_compute_instance.bastion-host.network_interface.0.nat_ip_address,
     elasticsearch-private-ip = yandex_compute_instance.elasticsearch-server.network_interface.0.ip_address,
@@ -28,5 +28,13 @@ Application load balancer = ${yandex_alb_load_balancer.diploma-load-balancer.lis
 Zabbix server = ${yandex_compute_instance.zabbix-server.network_interface.0.nat_ip_address}
 Kibana server = ${yandex_compute_instance.kibana-server.network_interface.0.nat_ip_address}
 Bastion host = ${yandex_compute_instance.bastion-host.network_interface.0.nat_ip_address}
+OUTPUT
+}
+
+output "zabbix-server-private-ip" {
+  description = "Is used in main-diploma-script.sh to create additional configuration file for zabbix-agent"
+  value = <<OUTPUT
+#Additional configuration file for zabbix-agent
+Server=${yandex_compute_instance.zabbix-server.network_interface.0.ip_address}
 OUTPUT
 }
