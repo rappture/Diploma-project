@@ -1,9 +1,0 @@
-<html>
-<center>
-   <h2> IP-address: "{{ ansible_default_ipv4.address }}" </h2>
-   <h3> CPU: "{{ ansible_processor }}" </h3>
-   <h3> RAM: "{{ ansible_memtotal_mb }}" </h3>
-   <h1> HDD total: "{{ ansible_mounts.0.size_total }}" </h1>
-   <h3> HDD1 size: "{{ ansible_devices.vda.partitions.vda2.size }}" </h3>
-</center>
-</html>

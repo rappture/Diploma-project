@@ -1,7 +1,0 @@
----
-- name: Terraform lesson 2 task 1 part 2 (start nginx via Ansible).
-  hosts: cloud_machines
-  become: true
- 
-  roles:
-    - nginx-role
