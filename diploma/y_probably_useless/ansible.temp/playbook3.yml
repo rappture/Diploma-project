@@ -1,0 +1,16 @@
+---
+- name: Ansible lesson 2 task 1 part 3.
+  hosts: deb10machines
+  become: true
+  vars:
+    greeting: "Hellow admin! I would tell you a UDP joke, but you might not get it."
+
+  tasks:
+
+  - name: Change system welcome message.
+    copy:
+      content: "{{ greeting }}"
+      dest: "/etc/motd"
+      owner: root
+      group: root
+      mode: 0644

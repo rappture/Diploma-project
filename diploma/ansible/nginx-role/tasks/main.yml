@@ -1,0 +1,47 @@
+---
+# tasks file for nginx
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Create the directory for index.html file.
+  file:
+    path: "{{ destin_folder_nginx }}"
+    state: directory
+ 
+- name: Make index.html.
+  template:
+    src: "index.html.j2"
+    dest: "{{ destin_folder_nginx }}/index.html"
+    mode: 0555
+  notify:
+    - Restart Nginx handler 
+
+- name: Copy configuration and ssl certificate files for nginx.
+  copy: 
+    src: "{{ item }}"
+    dest: "/etc/nginx"
+    mode: 0555
+  loop:
+    - "cert.pem"
+    - "cert.key"
+    - "nginx.conf" 
+  notify: 
+    - Restart Nginx handler
+
+- name: Start "nginx" and make it enabled on boot.
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Website availability check. 
+  uri:
+    url: "http://{{ ansible_default_ipv4.address }}"
+    return_content: yes
+  register: out
+
+- name: Print uri's out
+  debug:
+    msg: "{{ out.status }}" 

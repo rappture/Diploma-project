@@ -1,0 +1,22 @@
+---
+- name: Terraform lesson 2 task 2. 
+  #hosts: deb10machines
+  #hosts: shkutovayuliya@10.0.2.7
+  hosts: cloud_machines
+  become: true
+
+  tasks:
+
+  - name: Check status of the services.
+    service_facts:
+    register: output
+
+  - debug:
+      msg: 
+        - 'Nginx state is {{ output.ansible_facts.services["nginx.service"].state }}'
+    when: "'cloud_webservers' in group_names"
+
+  - debug:
+      msg: 
+        - 'PostgreSQL state is {{ output.ansible_facts.services["postgresql.service"].state }}'   
+    when: "'cloud_dbservers' in group_names"
