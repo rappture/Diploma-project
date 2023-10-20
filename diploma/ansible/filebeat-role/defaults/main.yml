@@ -1,0 +1,4 @@
+---
+# defaults file for filebeat-role
+#
+myvar: /var/www/example

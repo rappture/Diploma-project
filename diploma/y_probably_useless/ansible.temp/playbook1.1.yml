@@ -1,0 +1,17 @@
+---
+- name: Ansible lesson 2 task 1 part 1. 
+  hosts: deb10machines
+
+  tasks:
+
+# The parameter "creates" in "unarchive" module doesn't seems to work. Had to use following separate task instead.  
+  - name: Create a new folder. 
+    file:
+      path: "{{ ansible_user_dir }}/ansible211"
+      state: directory
+
+  - name: Download and unpack an archive.
+    unarchive:
+      src: "https://s316vlx.storage.yandex.net/rdisk/e79e5cbe4e74f3a1cea84b17b455c4d398cbddc071679ad2bb3b01936a22ccad/643454aa/17yanLqbX4yLr2DodkW66pzDPD2NV5NibVmbJTuJUAN6aD_r3clwqUASQ0ep8S2zakXvHaOJ44Q4hrT_h9KE7Q==?uid=0&filename=archive4hw.tar.gz&disposition=attachment&hash=dujhMO0aBuSNhNPTM9pteRsTRH57S%2BTgPOrv91qSQKwvL062oxPiehHfaBR7rKqiq/J6bpmRyOJonT3VoXnDag%3D%3D&limit=0&content_type=application%2Fx-tar&owner_uid=37929761&fsize=10240&hid=927282df771d3c2b351f9033ca9011c1&media_type=compressed&tknv=v2&rtoken=D9g58Oz2J5F2&force_default=no&ycrid=na-41e8309229273f475cad08207c271e13-downloader11f&ts=5f8ff80defe80&s=51722a1e5b0b4154c8d46f291dc9c0150669450c10d6b8cd0f0c217b6d5c9a25&pb=U2FsdGVkX18iWYZaPQVnaBy1gkJF8Uuncob_MdWl9oOBuYx-T7b4iwlhdSS-JHxh48De954oIkWN_ywQvgYYmkLmti4QW4QeNMYKauMizE0"
+      dest: "{{ ansible_user_dir }}/ansible211"
+      remote_src: true  
