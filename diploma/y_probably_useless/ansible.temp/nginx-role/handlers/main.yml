@@ -1,7 +1,0 @@
----
-# handlers file for apache
-#
-- name: Restart Nginx handler
-  service:
-    name: nginx
-    state: restarted
