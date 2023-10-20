@@ -1,7 +1,0 @@
----
-- name: Diploma playbook zabbix-server
-  hosts: cloud_zabbix
-  become: true
- 
-  roles:
-    - zabbix-server-role
