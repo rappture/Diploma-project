@@ -1,0 +1,30 @@
+---
+# tasks file for filebeat-role
+
+- name: Add GPG key for yandex mirror apt repository 
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+
+- name: Add yandex mirror apt repository
+  apt_repository:
+    repo: "deb [trusted=yes] https://mirror.yandex.ru/mirrors/elastic/8/ stable main"
+    state: present    
+
+- name: Update APT package cache and install filebeat
+  apt:
+    update_cache: yes
+    name: filebeat
+    state: present
+
+- name: Configure Filebeat  (Make zabbix.conf.php and place it in /etc/zabbix/web/)
+  template:
+    src: filebeat.yml.j2
+    dest: /etc/filebeat/filebeat.yml
+    notify: Restart filebeat handler
+
+- name: Start Filebeat service
+  service:
+    name: filebeat
+    state: started
+    enabled: yes
