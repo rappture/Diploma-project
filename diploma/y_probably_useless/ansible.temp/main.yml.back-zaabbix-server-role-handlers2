@@ -1,0 +1,16 @@
+---
+# handlers file for zabbix-server-role
+#
+- name: Restart zabbix-server apache2 postgresql handler
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - zabbix-server
+    - postgresql
+    - apache2 
+
+- name: Restart zabbix-server handler
+  service:
+    name: zabbix-server
+    state: restarted

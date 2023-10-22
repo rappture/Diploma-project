@@ -1,0 +1,4 @@
+---
+# defaults file for nginx-role
+#
+destin_folder_nginx: /var/www/public
