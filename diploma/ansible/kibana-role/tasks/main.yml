@@ -1,0 +1,18 @@
+---
+# tasks file for kibana-role
+
+- name: Download and install kibana from .deb package  (source - yandex mirror)
+  apt:
+    deb: https://mirror.yandex.ru/mirrors/elastic/8/pool/main/k/kibana/kibana-8.10.3-amd64.deb
+
+#- name: Configure Filebeat  (Make zabbix.conf.php and place it in /etc/zabbix/web/)
+#  template:
+#    src: filebeat.yml.j2
+#    dest: /etc/filebeat/filebeat.yml
+#    notify: Restart filebeat handler
+
+#- name: Start Filebeat service
+#  service:
+#    name: filebeat
+#    state: started
+#    enabled: yes
