@@ -1,0 +1,39 @@
+---
+# tasks file for kibana-role
+
+- name: Download and install kibana from .deb package  (source - yandex mirror)
+  apt:
+    deb: https://mirror.yandex.ru/mirrors/elastic/8/pool/main/k/kibana/kibana-8.10.3-amd64.deb
+
+- name: Create directories for certificates
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "/etc/kibana/certs"
+    - "/etc/kibana/certs/elastic-mycert.d"
+    - "/etc/kibana/certs/kibana-mycert.d"
+
+- name: Copy the certificate authority file to kibana-server
+  copy:
+    src: ca.crt
+    dest: /etc/kibana/certs/elastic-mycert.d/ca.crt
+
+- name: Unzip kibana-mycert.d.zip and place its contents to /etc/kibana/certs/kibana-mycert.d
+  unarchive:
+    src: kibana-mycert.d.zip
+    dest: /etc/kibana/certs/kibana-mycert.d/
+    extra_opts:
+    - -j
+
+- name: Configure kibana (Make kibana.yml and place it in /etc/kibana/)
+  template:
+    src: kibana.yml.j2
+    dest: /etc/kibana/kibana.yml
+#  notify: Restart kibana handler
+
+#- name: Start kibana service
+#  service:
+#    name: kibana
+#    state: started
+#    enabled: yes
