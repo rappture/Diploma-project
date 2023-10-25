@@ -1,0 +1,129 @@
+---
+# tasks file for zabbix-server-role
+
+- name: Download and install zabbix repository from official .deb package
+  apt:
+    deb: https://repo.zabbix.com/zabbix/6.0/debian/pool/main/z/zabbix-release/zabbix-release_6.0-4+debian11_all.deb
+
+- name: Update repositories cache and install packages required by zabbix documentation and community.postgresql.* modules
+  apt:
+    pkg:
+    - postgresql
+    - zabbix-server-pgsql
+    - zabbix-frontend-php
+    - php7.4-pgsql
+    - zabbix-apache-conf
+    - zabbix-sql-scripts
+    - zabbix-agent
+    - acl #required to avoid "Failed to set permissions on the temporary files Ansible needs to create when becoming an unprivileged user" error
+    - python3-psycopg2 #required to avoid "Failed to import the required Python library (psycopg2) on zabbix-server's Python /usr/bin/python3" error
+    update_cache: yes
+    state: present
+
+- name: Start zabbix-server apache2 postgresql and make them enabled on boot
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - zabbix-server
+    - postgresql
+    - apache2 
+
+- name: Create user zabbix in postgresql
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: zabbix
+    password: "{{ DBpass }}"
+
+- name: Create database zabbix owned by user zabbix
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: zabbix
+    owner: zabbix
+
+- name: Check if zabbix database already has data-schema
+  shell: sudo -u postgres psql -d zabbix -c "\dt" 2>&1
+  register: dt_result
+
+- name: Import initial data-schema
+  shell:
+    cmd: zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
+  when: "'Did not find any relations' in dt_result.stdout"
+
+- name: Update zabbix_server.conf with DBPassword=
+  replace:
+    path: /etc/zabbix/zabbix_server.conf
+    regexp: '^# DBPassword=$'
+    replace: "DBPassword={{ DBpass }}"
+  notify: 
+    - Restart zabbix-server apache2 postgresql handler
+
+- name: Make zabbix.conf.php and place it in /etc/zabbix/web/
+  template:
+    src: "zabbix.conf.php.j2"
+    dest: "/etc/zabbix/web/zabbix.conf.php"
+    mode: '0600'
+    owner: www-data
+    group: www-data
+  notify:
+    - Restart zabbix-server apache2 postgresql handler
+
+- name: Restart zabbix-server and apache2
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - zabbix-server
+    - apache2 
+
+- name: Send user.login request to Zabbix API and receive a user authentication token
+  uri:
+    url: "http://localhost/zabbix/api_jsonrpc.php"
+    method: POST
+    headers:
+      Content-Type: application/json-rpc
+    body: "{{ lookup('file', '~/ansible/zabbix-server-role/files/zabbix-token-request.json') }}"
+    body_format: json 
+    status_code: 200
+  register: token_response
+
+- name: Extract the user authentication token from the JSON response
+  set_fact:
+    zabbix_token: "{{ token_response.json.result }}"
+
+#- name: Display the token
+#  debug:
+#    var: zabbix_token 
+
+- name: Send action.create request to Zabbix API
+  uri:
+    url: "http://localhost/zabbix/api_jsonrpc.php"
+    method: POST
+    headers:
+      Content-Type: application/json-rpc
+    body: "{{ lookup('template', '~/ansible/zabbix-server-role/templates/zabbix-create-action-request.json.j2') }}"
+    body_format: json 
+    status_code: 200
+  register: action_response
+
+- name: Display response to action.create request
+  debug:
+    var: action_response
+
+- name: Send dashboard.create request to Zabbix API
+  uri:
+    url: "http://localhost/zabbix/api_jsonrpc.php"
+    method: POST
+    headers:
+      Content-Type: application/json-rpc
+    body: "{{ lookup('template', '~/ansible/zabbix-server-role/templates/zabbix-create-dashboard-request.json.j2') }}"
+    body_format: json 
+    status_code: 200
+  register: dashboard_response
+
+- name: Display response to action.create request
+  debug:
+    var: dashboard_response
+
+

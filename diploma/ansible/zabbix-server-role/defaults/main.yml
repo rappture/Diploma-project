@@ -1,0 +1,9 @@
+---
+# defaults file for zabbix-server-role
+#
+DBpass: pstgrspsswrd
+
+##foreign
+#zabbix_agent_s: {"web-server-1", "web-server-2", "zabbix-server"}
+#zabbix_agent_web: {"web-server-1", "web-server-2"}
+##endforeign
