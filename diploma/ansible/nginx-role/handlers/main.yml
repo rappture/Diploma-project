@@ -1,7 +1,0 @@
----
-# handlers file for nginx-role
-#
-- name: Restart Nginx handler
-  service:
-    name: nginx
-    state: restarted
