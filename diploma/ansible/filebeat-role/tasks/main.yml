@@ -1,0 +1,124 @@
+---
+# tasks file for filebeat-role
+
+- name: Download and install filebeat from .deb package  (source - yandex mirror)
+  apt:
+    deb: https://mirror.yandex.ru/mirrors/elastic/8/pool/main/f/filebeat/filebeat-8.10.3-amd64.deb
+
+- name: Install python3-pexpect
+  apt:
+    name: python3-pexpect
+    state: present
+
+- name: Create directories for certificates
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "/etc/filebeat/certs"
+    - "/etc/filebeat/certs/elastic-mycert.d"
+    - "/etc/filebeat/certs/filebeat-mycert.d"
+
+- name: Copy the certificate authority file to all web-servers
+  copy:
+    src: ca.crt
+    dest: /etc/filebeat/certs/elastic-mycert.d/ca.crt
+
+- name: Tasks for web-server-1 only
+  block:
+
+    - name: Unzip w1-filebeat-mycert.d.zip and place its contents to /etc/filebeat/certs/filebeat-mycert.d
+      unarchive:
+        src: w1-filebeat-mycert.d.zip
+        dest: /etc/filebeat/certs/filebeat-mycert.d/
+        extra_opts:
+        - -j
+
+    - name: Put elasticsearch API key (ES_API_KEY) for web-server-1 into filebeat keystore
+      expect:
+        command: sudo filebeat keystore add ES_API_KEY
+        responses:
+          "Setting ES_API_KEY already exists, Overwrite\\? \\[y\\/N\\]\\:" : "y"
+          "The keystore does not exist\\. Do you want to create it\\? \\[y\\/N\\]\\:" : "y"
+          "Enter value for ES_API_KEY\\:" : "{{ hostvars[elasticsearchPRIVATEip]['w1filebeatAPIkey'] }}"
+      no_log: true
+      notify: Restart filebeat handler
+      when: "hostvars[elasticsearchPRIVATEip]['w1filebeatAPIkey'] is defined"
+
+    - name: Task to return fail if w1filebeatAPIkey is undefined
+      fail :
+        msg: w1filebeatAPIkey is undefined
+      when: "hostvars[elasticsearchPRIVATEip]['w1filebeatAPIkey'] is undefined"
+      ignore_errors: true
+
+  when: ansible_hostname == "web-server-1"
+
+- name: Tasks for web-server-2 only
+  block:
+
+    - name: Unzip w2-filebeat-mycert.d.zip and place its contents to /etc/filebeat/certs/filebeat-mycert.d
+      unarchive:
+        src: w2-filebeat-mycert.d.zip
+        dest: /etc/filebeat/certs/filebeat-mycert.d/
+        extra_opts:
+        - -j
+
+    - name: Put elasticsearch API key (ES_API_KEY) for web-server-2 into filebeat keystore
+      expect:
+        command: sudo filebeat keystore add ES_API_KEY
+        responses:
+          "Setting ES_API_KEY already exists, Overwrite\\? \\[y\\/N\\]\\:" : "y"
+          "The keystore does not exist\\. Do you want to create it\\? \\[y\\/N\\]\\:" : "y"
+          "Enter value for ES_API_KEY\\:" : "{{ hostvars[elasticsearchPRIVATEip]['w2filebeatAPIkey'] }}"
+      no_log: true
+      notify: Restart filebeat handler
+      when: "hostvars[elasticsearchPRIVATEip]['w2filebeatAPIkey'] is defined"
+
+    - name: Task to return fail if w2filebeatAPIkey is undefined
+      fail :
+        msg: w2filebeatAPIkey is undefined
+      when: "hostvars[elasticsearchPRIVATEip]['w2filebeatAPIkey'] is undefined"
+      ignore_errors: true
+
+  when: ansible_hostname == "web-server-2"
+
+- name: Remove file /etc/filebeat/modules.d/nginx.yml.disabled
+  file:
+    path: /etc/filebeat/modules.d/nginx.yml.disabled
+    state: absent
+
+- name: Configure filebeat module for nginx (place nginx.yml into /etc/filebeat/modules.d/)
+  copy:
+    src: nginx.yml
+    dest: /etc/filebeat/modules.d/nginx.yml
+  notify: Restart filebeat handler
+
+- name: Configure filebeat (make filebeat.yml and place it in /etc/filebeat/)
+  template:
+    src: "filebeat.yml.j2"
+    dest: "/etc/filebeat/filebeat.yml"
+  notify: Restart filebeat handler
+
+- name: Run "filebeat setup" on web-server-1
+  shell: filebeat setup -c /etc/filebeat/filebeat.yml --path.home /usr/share/filebeat --path.data /var/lib/filebeat -E "output.elasticsearch.username=elastic" -E "output.elasticsearch.password={{ hostvars[elasticsearchPRIVATEip]['elasticPassword'] }}"
+  no_log: true
+  when: "hostvars[elasticsearchPRIVATEip]['elasticPassword'] is defined and ansible_hostname == 'web-server-1'"
+
+- name: Task to return fail if elasticPassword is undefined
+  fail :
+    msg: elasticPassword is undefined
+  when: "hostvars[elasticsearchPRIVATEip]['elasticPassword'] is undefined"
+  ignore_errors: true
+
+- name: Update /etc/filebeat/filebeat.yml with information on using api_key
+  ansible.builtin.replace:
+    path: /etc/filebeat/filebeat.yml 
+    regexp: '^  ##api_key: "\$\{ES_API_KEY\}"'
+    replace: '  api_key: "${ES_API_KEY}"'
+  no_log: true
+
+- name: Start Filebeat service
+  service:
+    name: filebeat
+    state: started
+    enabled: yes

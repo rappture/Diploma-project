@@ -1,0 +1,176 @@
+###sudo /usr/share/elasticsearch/bin/elasticsearch-reset-password -i -u elastic
+This tool will reset the password of the [elastic] user.
+You will be prompted to enter the password.
+Please confirm that you would like to continue [y/N]y
+
+
+Enter password for [elastic]: secretpassword
+Re-enter password for [elastic]: secretpassword
+Password for the [elastic] user successfully reset.
+
+
+#sudo curl -X GET -u elastic:Syjkmq69mJF68Jv+74db https://10.152.0.5:9200 --cacert /etc/elasticsearch/certs/ca.d/ca.crt
+{
+  "name" : "elasticsearch-server",
+  "cluster_name" : "diploma-elasticsearch-cluster",
+  "cluster_uuid" : "gvhLqRvdTxCv1I_ZOBdwQA",
+  "version" : {
+    "number" : "8.10.3",
+    "build_flavor" : "default",
+    "build_type" : "deb",
+    "build_hash" : "c63272efed16b5a1c25f3ce500715b7fddf9a9fb",
+    "build_date" : "2023-10-05T10:15:55.152563867Z",
+    "build_snapshot" : false,
+    "lucene_version" : "9.7.0",
+    "minimum_wire_compatibility_version" : "7.17.0",
+    "minimum_index_compatibility_version" : "7.0.0"
+  },
+  "tagline" : "You Know, for Search"
+}
+
+curl -k -X GET -u elastic:Auaw2rFG5nKVp3PlbNly 'https://10.152.0.10:9200/_cluster/health?pretty'
+
+
+---###curl -k -v -u elastic https://10.152.0.11:9200
+---Enter host password for user 'elastic': FKpY*T3CM5Cm6ftaKTqL
+
+
+sudo /usr/share/elasticsearch/bin/elasticsearch-reset-password -i -u kibana_system
+This tool will reset the password of the [kibana] user.
+You will be prompted to enter the password.
+Please confirm that you would like to continue [y/N]y
+
+
+Enter password for [kibana]: kibapas
+Re-enter password for [kibana]: kibapas
+Password for the [kibana] user successfully reset.
+
+
+#sudo /usr/share/elasticsearch/bin/elasticsearch-service-tokens create elastic/kibana kibana_token
+SERVICE_TOKEN elastic/kibana/kibana_token = AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYV90b2tlbjo4MVhIdjE0X1N0NkdjbVpGSTRxc3dB
+
+#sudo chmod g+r /etc/elasticsearch/service_tokens
+
+#sudo systemctl restart elasticsearch
+
+sudo /usr/share/elasticsearch/bin/elasticsearch-service-tokens list
+
+
+
+
+OK# sudo openssl x509 -fingerprint -sha256 -noout -in /etc/elasticsearch/certs/ca.d/ca.crt | awk -F "=" '{print $2}' | sed 's/://g'
+A3AD2BC7FD7F6BD3CB709F82918ADBAC96379DFCF935809D2D554FD7E8002055
+
+
+OK# sudo curl -X POST -u elastic:Syjkmq69mJF68Jv+74db "https://10.152.0.18:9200/_security/api_key?pretty" --cacert /etc/elasticsearch/certs/ca.d/ca.crt -H 'Content-Type: application/json' -d'
+{
+  "name": "filebeat_web-server-1", 
+  "role_descriptors": {
+    "filebeat_writer": { 
+      "cluster": ["monitor", "read_ilm", "read_pipeline", "manage_ingest_pipelines", "manage_pipeline"],                
+      "index": [
+        {                         
+          "names": ["filebeat-*"],
+          "privileges": ["view_index_metadata", "create_doc", "read", "write", "maintenance"]
+        }
+      ]
+    }
+  }
+}
+'
+ОТВЕТ
+{
+  "id" : "2IwRfosBs1dfZqrBqrtA",
+  "name" : "filebeat_web-server-1",
+  "api_key" : "QkMa06quT2KFwBq3Ro_iOw",
+  "encoded" : "Mkl3UmZvc0JzMWRmWnFyQnFydEE6UWtNYTA2cXVUMktGd0JxM1JvX2lPdw=="
+}
+ПРИВЕСТИ К ВИДУ:
+2IwRfosBs1dfZqrBqrtA:QkMa06quT2KFwBq3Ro_iOw
+
+
+
+##################################KIBANA##################################################################################################################
+
+#sudo /usr/share/kibana/bin/kibana-keystore add elasticsearch.serviceAccountToken
+Enter value for elasticsearch.serviceAccountToken: ************************************************************************
+#sudo systemctl enable kibana
+#sudo systemctl start kibana
+
+sudo journalctl -u kibana.service | tail -100
+sudo journalctl -u kibana.service -n 90
+
+curl -k -XGET https://localhost:5601/api/status
+
+
+#sudo /usr/share/kibana/bin/kibana-keystore add elasticsearch.serviceAccountToken
+Setting elasticsearch.serviceAccountToken already exists. Overwrite? [y/N] n
+Exiting without modifying keystore.
+
+##################################KIBANA##################################################################################################################
+
+##/usr/share/filebeat/bin/filebeat test config -c /etc/filebeat/filebeat.yml --path.home /usr/share/filebeat --path.data /var/lib/filebeat
+
+##/usr/share/filebeat/bin/filebeat test output -c /etc/filebeat/filebeat.yml --path.home /usr/share/filebeat --path.data /var/lib/filebeat
+
+#/usr/share/filebeat/bin/filebeat setup -c /etc/filebeat/filebeat.yml --path.home /usr/share/filebeat --path.data /var/lib/filebeat
+
+#filebeat -E "name=mybeat" -E "output.elasticsearch.hosts=['http://myhost:9200']"
+https://www.elastic.co/guide/en/beats/filebeat/current/command-line-options.html#setup-command
+
+
+sudo filebeat keystore add ES_PWD --force
+
+
+#OK sudo filebeat keystore add ES_API_KEY
+The keystore does not exist. Do you want to create it? [y/N]: y
+Created keystore
+Enter value for ES_API_KEY: (не видно, что вводим 2IwRfosBs1dfZqrBqrtA:QkMa06quT2KFwBq3Ro_iOw)
+Successfully updated the keystore
+
+#OK sudo filebeat keystore add ES_API_KEY
+Setting ES_API_KEY already exists, Overwrite? [y/N]: y
+Enter value for ES_API_KEY: (не видно, что вводим 2IwRfosBs1dfZqrBqrtA:QkMa06quT2KFwBq3Ro_iOw)
+Successfully updated the keystore
+
+#OK sudo filebeat keystore add ES_CA_FINGERPRINT
+Enter value for ES_CA_FINGERPRINT: (не видно, что вводим A3AD2BC7FD7F6BD3CB709F82918ADBAC96379DFCF935809D2D554FD7E8002055)
+Successfully updated the keystore
+
+sudo mv /etc/filebeat/modules.d/nginx.yml.disabled /etc/filebeat/modules.d/nginx.yml
+sudo vim /etc/filebeat/modules.d/nginx.yml
+
+
+
+
+
+
+
+
+
+
+
+
+sudo curl -X POST -u elastic:VW=qukyRQsn=CI*fO9jc "https://10.152.0.25:9200/_security/api_key?pretty" --cacert /etc/elasticsearch/certs/ca.d/ca.crt -H 'Content-Type: application/json' -d'
+{
+  "name": "filebeat_web-server-2", 
+  "role_descriptors": {
+    "filebeat_writer": { 
+      "cluster": ["monitor", "read_ilm", "read_pipeline", "manage_ingest_pipelines", "manage_pipeline"],                
+      "index": [
+        {                         
+          "names": ["filebeat-*"],
+          "privileges": ["view_index_metadata", "create_doc", "read", "write", "maintenance"]
+        }
+      ],
+      "applications": [
+        {
+          "application" : "kibana-.kibana",
+          "privileges" : ["all"],
+          "resources" : [ "*" ]
+        }
+      ]
+    }
+  }
+}
+'

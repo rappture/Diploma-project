@@ -1,0 +1,27 @@
+---
+# tasks file for apache
+- name: Install apache2
+  apt:
+    name: apache2
+    state: present
+ 
+- name: Make index.html.
+  template:
+    src: "/home/yuliya_shkutova/ansible_hw/apache/templates/index.html.j2"
+    dest: "/var/www/html/index.html"
+
+- name: Start "apache2" and make it enabled on boot.
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+
+- name: Website availability check. 
+  uri:
+    url: "http://{{ ansible_default_ipv4.address }}"
+    return_content: yes
+  register: out
+
+- name: Print uri's out
+  debug:
+    msg: "{{ out.status }}" 
