@@ -1,7 +1,0 @@
----
-# handlers file for filebeat-role
-#
-- name: Restart filebeat handler
-  ansible.builtin.service:
-    name: filebeat
-    state: restarted
