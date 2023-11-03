@@ -1,0 +1,4 @@
+---
+# defaults file for apache
+#
+destin_folder: /var/www/public

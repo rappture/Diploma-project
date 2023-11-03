@@ -1,0 +1,63 @@
+---
+# tasks file for nginx-role
+
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+
+- name: Create the directory for index.html file.
+  ansible.builtin.file:
+    path: "{{ destin_folder_nginx }}"
+    state: directory
+ 
+- name: Make index.html
+  ansible.builtin.template:
+    src: "index.html.j2"
+    dest: "{{ destin_folder_nginx }}/index.html"
+    mode: 0555
+  notify:
+    - Restart Nginx handler 
+
+- name: Copy assets directory for the website
+  ansible.builtin.copy: 
+    src: "assets/"
+    dest: "{{ destin_folder_nginx }}/assets/"
+    mode: 0555
+  notify: 
+    - Restart Nginx handler
+
+- name: Make nginx.conf
+  ansible.builtin.template:
+    src: "nginx.conf.j2"
+    dest: "/etc/nginx/nginx.conf"
+    mode: 0555
+  notify:
+    - Restart Nginx handler
+
+- name: Copy ssl certificate files for nginx
+  ansible.builtin.copy: 
+    src: "{{ item }}"
+    dest: "/etc/nginx"
+    mode: 0555
+  loop:
+    - "cert.pem"
+    - "cert.key" 
+  notify: 
+    - Restart Nginx handler
+
+- name: Start "nginx" and make it enabled on boot
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: Website availability check. 
+  ansible.builtin.uri:
+    url: "http://{{ ansible_default_ipv4.address }}"
+    return_content: yes
+  register: out
+
+- name: Print uri's out
+  ansible.builtin.debug:
+    msg: "{{ out.status }}" 
