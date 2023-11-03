@@ -1,0 +1,15 @@
+#cloud-config
+disable_root: true
+timezone: Europe/Moscow
+repo_update: true
+repo_upgrade: true
+apt:
+  preserve_sources_list: true
+
+users:
+  - name: yuliya_sh
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDr2ORZX8/Q8ys+3ErronM9FjtTlCPKI/E0QnrhmsLBZkWSRbpR9JWv5bACHBTzGm8ALb64rhP8Mod1PaBEkRCO0u/yN6ze/lSFakChA82SyV/SFeOXMzgPI8AJEdHeH0pcGNxxFsHm22GjI+Lv+SZGAbCJR4CnGek5u+a+L6FTTP4OZ/BweTHh5WSLvn9DJdb0vE/+SjZDEdrZ33Fkvr42hVNhnM9Wif/FuusafGWm96odXE/U7WcMzwoziJy8IyYrMzbeIDM91uo458iFn3XAb6aRt4EVfLZGwTTDlp1Q0SPga6uDaOP22ZIlbIUnb+kmzB1yrXQqheVM4c601Fxj5aAiTBsAapgGEEiAhElMjfIpX1jK4rxRiXEcAe1djfV1lfKHquLTdwvNQh0C6aW6hElOip0tR0791Xtll4MM+wNaRm7GD8cz0KdFeGm9Frz1R6P1zNrvdGr1C7ifZHUWgVKWSw5pTUemGOjx5cTu5D3KLXYj8LPfdHfcyaz6mHE= yuliya_shkutova@serenity-deb11

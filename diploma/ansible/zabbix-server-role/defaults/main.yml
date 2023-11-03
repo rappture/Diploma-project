@@ -1,0 +1,4 @@
+---
+# defaults file for zabbix-server-role
+#
+DBpass: pstgrspsswrd
