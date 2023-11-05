@@ -1,0 +1,26 @@
+---
+- name: Diploma playbook for elasticsearch-server
+  hosts: cloud_elasticsearch
+  become: true 
+  roles:
+    - elasticsearch-role
+
+- name: Diploma playbook for kibana-server
+  hosts: cloud_kibana
+  become: true 
+  roles:
+    - kibana-role
+
+- name: Diploma playbook for web-servers
+  hosts: cloud_webservers
+  become: true 
+  roles:
+    - nginx-role
+    - zabbix-agent-role
+    - filebeat-role
+
+- name: Diploma playbook for zabbix-server
+  hosts: cloud_zabbix
+  become: true 
+  roles:
+    - zabbix-server-role

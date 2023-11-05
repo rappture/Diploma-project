@@ -1,0 +1,16 @@
+---
+# tasks file for elk-repository-role
+
+- name: Copy files which allow to use yandex mirror elk repositiry
+  copy: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  loop:
+    - { src: "20packagekit", dest: "/etc/apt/apt.conf.d/20packagekit" }
+    - { src: "elastic-8.x.list", dest: "/etc/apt/sources.list.d/elastic-8.x.list" }
+    - { src: "elasticsearch-keyring.gpg", dest: "/usr/share/keyrings/elasticsearch-keyring.gpg" }
+
+- name: Update apt cache
+  apt:
+    update_cache: yes

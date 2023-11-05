@@ -1,0 +1,26 @@
+ФАЙЛЫ, КОТОРЫЕ МОГУТ ЗАТРАГИВАТЬ ИЗМЕНЕНИЯ ansible_host С ip НА fqdn
+
+C:\Users\Julia\Desktop\common\c_ansible\nginx-role\(##templates\nginx.conf.j2) - только в версии от 03/11.2023 далее перешли на (files\nginx.conf) и шаблон 10266 для действия автоподключения в заббикс.
+
+*PRIVATEip было в:
+## C:\Users\Julia\Desktop\common\c_ansible\elasticsearch-role\templates\make-certs.sh.j2**
+## C:\Users\Julia\Desktop\common\c_ansible\filebeat-role\templates\filebeat.yml.j2
+## C:\Users\Julia\Desktop\common\c_ansible\kibana-role\templates\kibana.yml.j2
+## C:\Users\Julia\Desktop\common\c_ansible\zabbix-agent-role\tasks\main.yml
+
+
+{{ ansible_default_ipv4.address }} было в:
+## C:\Users\Julia\Desktop\common\c_ansible\elasticsearch-role\tasks\main.yml
+## C:\Users\Julia\Desktop\common\c_ansible\elasticsearch-role\templates\elasticsearch.yml.j2
+## C:\Users\Julia\Desktop\common\c_ansible\elasticsearch-role\templates\make-certs.sh.j2
+== C:\Users\Julia\Desktop\common\c_ansible\nginx-role\tasks\main.yml +
+== C:\Users\Julia\Desktop\common\c_ansible\nginx-role\templates\index.html.j2 +
+== C:\Users\Julia\Desktop\common\c_ansible\zabbix-agent-role\tasks\main.yml +
+
+
+замена ## {{ hostvars['HOSTNAMEALIAS']['ansible_host'] }}
+
+замена == {{ ansible_fqdn }}
+
+* - вместо звездочки префикс = имя хоста (lowercase)
+** - внутри скрипта менять ip на dns и наоборот, в зависимости от схемы настройки.

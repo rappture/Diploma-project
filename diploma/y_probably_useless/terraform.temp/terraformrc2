@@ -1,0 +1,7 @@
+provider_installation {
+  dev_overrides {
+    "yandex-cloud/yandex" = "/usr/local/bin/yandex-d"
+  }
+
+  direct {}
+}
