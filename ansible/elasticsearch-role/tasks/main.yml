@@ -1,0 +1,173 @@
+---
+# tasks file for elasticsearch-role
+
+- name: Download and install elasticsearch from .deb package  (source - yandex mirror)
+  ansible.builtin.apt:
+    deb: https://mirror.yandex.ru/mirrors/elastic/8/pool/main/e/elasticsearch/elasticsearch-8.10.3-amd64.deb
+  register: installation_result
+  no_log: true
+
+#- name: Print the generated password for the elastic built-in superuser (out of the installation output)
+#  ansible.builtin.debug:
+#    var: installation_result.stdout_lines | select("search", "generated password")
+
+- name: Get elastic super-user password
+  block:
+
+    - name: Extract elasticPassword variable out of the installation_result
+      ansible.builtin.set_fact:
+        elasticPassword: "{{ installation_result.stdout_lines | select(\"search\", \"generated password\") | regex_replace('.* is . (.*)..', '\\1') }}"
+      no_log: true
+
+    - name: Print the generated password for the elastic built-in superuser (out of the installation output)
+      ansible.builtin.debug:
+        var: elasticPassword
+
+  when: installation_result is changed
+
+- name: Check if certificate folder elastic-mycert already exists
+  ansible.builtin.stat:
+    path: /etc/elasticsearch/certs/elastic-mycert.d/elastic-mycert.crt
+  register: cert_check  
+
+- name: Create certificates and place them as per configuration file elasticsearch.yml
+  block:
+
+    - name: Create /tmp/make-certs.sh locally
+      become: false
+      ansible.builtin.template:
+        src: make-certs.sh.j2
+        dest: /tmp/make-certs.sh
+      delegate_to: localhost
+
+    - name: Run make-certs.sh on the elasticsearch-server
+      ansible.builtin.script: /tmp/make-certs.sh 
+      args:
+        executable: bash
+
+  when: not cert_check.stat.exists
+
+- name: Pick up certificates for kibana-role and filebeat-role from elasticsearch-server to local machine
+  ansible.builtin.fetch:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    flat: yes
+  loop:
+    - { src: "/etc/elasticsearch/certs/ca.d/ca.crt", dest: "~/ansible/kibana-role/files/" }
+    - { src: "/tmp/kibana-mycert.d.zip", dest: "~/ansible/kibana-role/files/" }
+    - { src: "/etc/elasticsearch/certs/ca.d/ca.crt", dest: "~/ansible/filebeat-role/files/" }
+    - { src: "/tmp/w1-filebeat-mycert.d.zip", dest: "~/ansible/filebeat-role/files/" }
+    - { src: "/tmp/w2-filebeat-mycert.d.zip", dest: "~/ansible/filebeat-role/files/" }
+
+- name: Task to return fail if kibana service token already exists
+  ansible.builtin.replace:
+    path: /etc/elasticsearch/service_tokens 
+    regexp: ^elastic/kibana/kibana_token.*
+    replace: "lorem ipsum"  
+  check_mode: true
+  register: token_presence
+  failed_when: token_presence.changed
+  ignore_errors: true
+
+#- name: Print var token_presence
+#  ansible.builtin.debug:
+#    var: token_presence
+
+- name: Create elasticsearch.serviceAccountToken for kibana and extract kibanaToken variable out of the token_creation_output
+  block:
+
+    - name: Create elasticsearch.serviceAccountToken for kibana
+      ansible.builtin.shell: sudo /usr/share/elasticsearch/bin/elasticsearch-service-tokens create elastic/kibana kibana_token
+      no_log: true
+      register: token_creation_output
+      notify: Restart elasticsearch handler
+
+    - name: Extract kibanaToken variable out of the token_creation_output
+      ansible.builtin.set_fact:
+        kibanaToken: "{{ token_creation_output.stdout_lines[0] | regex_replace('.*= (.*)', '\\1') }}"
+      no_log: true
+
+#    - name: Print kibanaToken
+#      ansible.builtin.debug:
+#        var: kibanaToken
+
+  when: not token_presence.changed 
+
+- name: Change file permissions for /etc/elasticsearch/service_tokens
+  ansible.builtin.file:
+    path: /etc/elasticsearch/service_tokens
+    mode: g+r
+
+- name: Configure elasticsearch (Make elasticsearch.yml and place it in /etc/elasticsearch/)
+  ansible.builtin.template:
+    src: elasticsearch.yml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+  notify: Restart elasticsearch handler
+
+- name: Start elasticsearch service
+  ansible.builtin.service:
+    name: elasticsearch
+    state: started
+    enabled: yes
+
+- name: Create Create an API keys for publishing (for filebeat on both web-servers)
+  block:
+
+    - name: Create an API key for publishing (for filebeat on web-sever-1)
+      ansible.builtin.uri:
+        url: "https://{{ hostvars['ELASTICSEARCH']['ansible_host'] }}:9200/_security/api_key?pretty"
+        method: POST
+        url_username: "elastic"
+        url_password: '{{ elasticPassword }}'
+        ca_path: "/etc/elasticsearch/certs/ca.d/ca.crt"
+        headers:
+          Content-Type: application/json
+        body: "{{ lookup('file', 'web1-api-key-request.json') }}"
+        body_format: json 
+      no_log: true
+      register: web1_api_key_response
+      retries: 2
+      delay: 5
+      until: web1_api_key_response is not failed
+
+#    - name: Display response to action.create request
+#      ansible.builtin.debug:
+#        var: web1_api_key_response
+
+    - name: Extract w1filebeatAPIkey (id:api_key) variable out of the web1_api_key_response
+      ansible.builtin.set_fact:
+        w1filebeatAPIkey: "{{ web1_api_key_response.json.id }}:{{ web1_api_key_response.json.api_key }}"
+      no_log: true
+
+#    - name: Display w1filebeatAPIkey
+#      ansible.builtin.debug:
+#        var: w1filebeatAPIkey
+
+    - name: Create an API key for publishing (for filebeat on web-sever-2)
+      ansible.builtin.uri:
+        url: "https://{{ hostvars['ELASTICSEARCH']['ansible_host'] }}:9200/_security/api_key?pretty"
+        method: POST
+        url_username: "elastic"
+        url_password: '{{ elasticPassword }}'
+        ca_path: "/etc/elasticsearch/certs/ca.d/ca.crt"
+        headers:
+          Content-Type: application/json
+        body: "{{ lookup('file', 'web2-api-key-request.json') }}"
+        body_format: json 
+      no_log: true
+      register: web2_api_key_response
+
+#    - name: Display response to action.create request
+#      ansible.builtin.debug:
+#        var: web2_api_key_response
+
+    - name: Extract w2filebeatAPIkey (id:api_key) variable out of the web2_api_key_response
+      ansible.builtin.set_fact:
+        w2filebeatAPIkey: "{{ web2_api_key_response.json.id }}:{{ web2_api_key_response.json.api_key }}"
+      no_log: true
+
+#    - name: Display w2filebeatAPIkey
+#      ansible.builtin.debug:
+#        var: w2filebeatAPIkey
+
+  when: elasticPassword is defined
