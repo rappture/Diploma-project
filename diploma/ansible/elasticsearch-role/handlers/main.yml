@@ -1,7 +1,0 @@
----
-# handlers file for elasticsearch-role
-#
-- name: Restart elasticsearch handler
-  ansible.builtin.service:
-    name: elasticsearch
-    state: restarted
