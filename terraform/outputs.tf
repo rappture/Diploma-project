@@ -19,7 +19,7 @@ resource "local_file" "ansible-inventory" {
     web-server-1-fqdn = yandex_compute_instance.web-server-1.fqdn,
     web-server-2-fqdn = yandex_compute_instance.web-server-2.fqdn
   })
-  filename = pathexpand("~/ansible/hosts")
+  filename = pathexpand("~/Diploma-project/ansible/hosts")
 }
 
 output "public-ip-addresses" {

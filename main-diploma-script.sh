@@ -51,7 +51,7 @@ python3 -m pip install --user argcomplete && \
 activate-global-python-argcomplete --user
 }
 
-printf "\n${descriptionFont}*********************\n*********************\nWELCOME TO THE DIPLOMA SCRIPT!\n\033[7mPLEASE MAKE SURE YOU PLACED THE PROJECT FILES INTO YOUR HOME DIRECTORY.\033[m\n${descriptionFont}TO CONTINUE CHOOSE ONE OF THE FOLLOWING OPTIONS (TYPE 1 OR 2):\n  1 - INSTALL TERRAFORM, INSTALL ANSIBLE, APPLY TERRAFORM CONFIGURATION, EXECUTE ANSIBLE PLAYBOOK.\n  2 - SKIP THE INSTALLATION (TERRAFORM AND ANSIBLE ARE ALREADY INSTALLED), APPLY TERRAFORM CONFIGURATION, EXECUTE ANSIBLE PLAYBOOK.\nANY OTHER INPUT WILL INPUT WILL INTERRUPT THE SCRIPT.\n*********************\n*********************\n\n${normalFont}" 
+printf "\n${descriptionFont}*********************\n*********************\nWELCOME TO THE DIPLOMA SCRIPT!\n\033[7mPLEASE MAKE SURE YOU PLACED THE PROJECT FILES INTO YOUR HOME DIRECTORY (~/Diploma-project/).\033[m\n${descriptionFont}TO CONTINUE CHOOSE ONE OF THE FOLLOWING OPTIONS (TYPE 1 OR 2):\n  1 - INSTALL TERRAFORM, INSTALL ANSIBLE, APPLY TERRAFORM CONFIGURATION, EXECUTE ANSIBLE PLAYBOOK.\n  2 - SKIP THE INSTALLATION (TERRAFORM AND ANSIBLE ARE ALREADY INSTALLED), APPLY TERRAFORM CONFIGURATION, EXECUTE ANSIBLE PLAYBOOK.\nANY OTHER INPUT WILL INPUT WILL INTERRUPT THE SCRIPT.\n*********************\n*********************\n\n${normalFont}" 
  
 read EXEC_OPTION
 if [ $EXEC_OPTION == '1' ]
@@ -67,15 +67,15 @@ else
 	exit 1
 fi
 
-printf "\n${descriptionFont}*********************\n*********************\nGENERATING SSH-KEYS AND UPDATING ~/terraform/meta.yml WITH ~/.ssh/id_rsa.pub CONTENT\n*********************\n*********************\n\n${normalFont}" && \
+printf "\n${descriptionFont}*********************\n*********************\nGENERATING SSH-KEYS AND UPDATING ~/Diploma-project/terraform/meta.yml WITH ~/.ssh/id_rsa.pub CONTENT\n*********************\n*********************\n\n${normalFont}" && \
 ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa;
 pubkey=$(cat ~/.ssh/id_rsa.pub) && \
-sed -i "s|ssh-rsa|$pubkey|" ~/terraform/meta.yml && \
+sed -i "s|ssh-rsa|$pubkey|" ~/Diploma-project/terraform/meta.yml && \
 
 
 printf "\n${descriptionFont}*********************\n*********************\nCHECKING AND APPLYING TERRAFORM CONFIGURATION\n*********************\n*********************\n\n${normalFont}" && \
 
-cd ~/terraform && \
+cd ~/Diploma-project/terraform && \
 terraform init && \
 #terraform plan && \
 terraform validate && \
@@ -89,7 +89,7 @@ sudo cat /etc/ssh/ssh_config | grep StrictHostKeyChecking && \
 
 printf "\n${descriptionFont}*********************\n*********************\nCHECKING CONNECTION TO MANAGED HOSTS VIA ANSIBLE\n*********************\n*********************\n\n${normalFont}" && \
 
-cd ~/ansible && \
+cd ~/Diploma-project/ansible && \
 ansible all -m ping && \
 
 printf "\n${descriptionFont}*********************\n*********************\nSETTING SSH 'StrictHostKeyChecking' DIRECTIVE TO ITS DEFAULT VALUE\n*********************\n*********************\n\n${normalFont}" && \
@@ -97,13 +97,13 @@ printf "\n${descriptionFont}*********************\n*********************\nSETTIN
 sudo sed -i "s|   StrictHostKeyChecking accept-new|#   StrictHostKeyChecking ask|" /etc/ssh/ssh_config && \
 sudo cat /etc/ssh/ssh_config | grep StrictHostKeyChecking && \
 
-printf "\n${descriptionFont}*********************\n*********************\nRUNNING ANSIBLE PLAYBOOK ~/ansible/diploma-playbook.yml\n*********************\n*********************\n\n${normalFont}" && \
+printf "\n${descriptionFont}*********************\n*********************\nRUNNING ANSIBLE PLAYBOOK ~/Diploma-project/ansible/diploma-playbook.yml\n*********************\n*********************\n\n${normalFont}" && \
 
 ansible-playbook diploma-playbook.yml && \
 
 printf "\n${descriptionFont}*********************\n*********************\nALL DONE. BELOW ARE THE PUBLIC IP ADDRESSES OF YOUR RESOURCES.\nPLEASE DO NOT FORGET TO USE 'terraform destroy' WHENEVER YOU DON'T NEED THE INFRASTRUCTURE.\n*********************\n*********************\n\n${normalFont}" && \
 
-cd ~/terraform && \
+cd ~/Diploma-project/terraform && \
 terraform output -raw "public-ip-addresses" && \
 
 #Restart bash to ensure ansible and terraform autocompletions are enabled

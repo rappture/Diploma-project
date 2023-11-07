@@ -83,7 +83,7 @@
     method: POST
     headers:
       Content-Type: application/json-rpc
-    body: "{{ lookup('file', '~/ansible/zabbix-server-role/files/zabbix-token-request.json') }}"
+    body: "{{ lookup('file', 'zabbix-token-request.json') }}"
     body_format: json 
     status_code: 200
   register: token_response
@@ -102,7 +102,7 @@
     method: POST
     headers:
       Content-Type: application/json-rpc
-    body: "{{ lookup('template', '~/ansible/zabbix-server-role/templates/zabbix-create-action-request.json.j2') }}"
+    body: "{{ lookup('template', 'zabbix-create-action-request.json.j2') }}"
     body_format: json 
     status_code: 200
   register: action_response
@@ -117,7 +117,7 @@
     method: POST
     headers:
       Content-Type: application/json-rpc
-    body: "{{ lookup('template', '~/ansible/zabbix-server-role/templates/zabbix-create-dashboard-request.json.j2') }}"
+    body: "{{ lookup('template', 'zabbix-create-dashboard-request.json.j2') }}"
     body_format: json 
     status_code: 200
   register: dashboard_response

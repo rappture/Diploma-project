@@ -53,11 +53,11 @@
     dest: "{{ item.dest }}"
     flat: yes
   loop:
-    - { src: "/etc/elasticsearch/certs/ca.d/ca.crt", dest: "~/ansible/kibana-role/files/" }
-    - { src: "/tmp/kibana-mycert.d.zip", dest: "~/ansible/kibana-role/files/" }
-    - { src: "/etc/elasticsearch/certs/ca.d/ca.crt", dest: "~/ansible/filebeat-role/files/" }
-    - { src: "/tmp/w1-filebeat-mycert.d.zip", dest: "~/ansible/filebeat-role/files/" }
-    - { src: "/tmp/w2-filebeat-mycert.d.zip", dest: "~/ansible/filebeat-role/files/" }
+    - { src: "/etc/elasticsearch/certs/ca.d/ca.crt", dest: "kibana-role/files/" }
+    - { src: "/tmp/kibana-mycert.d.zip", dest: "kibana-role/files/" }
+    - { src: "/etc/elasticsearch/certs/ca.d/ca.crt", dest: "filebeat-role/files/" }
+    - { src: "/tmp/w1-filebeat-mycert.d.zip", dest: "filebeat-role/files/" }
+    - { src: "/tmp/w2-filebeat-mycert.d.zip", dest: "filebeat-role/files/" }
 
 - name: Task to return fail if kibana service token already exists
   ansible.builtin.replace:
